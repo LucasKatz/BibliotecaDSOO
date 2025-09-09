@@ -9,6 +9,7 @@ namespace Colecciones
         public string Calle { get; set; }
         public int Numero { get; set; }
 
+
         public Domicilio(string calle, int numero)
         {
             Calle = calle;
@@ -126,6 +127,7 @@ namespace Colecciones
             return "Lector registrado correctamente.";
         }
 
+        //Metodo para buscar si el lector existe
         public Lector BuscarLector(int dni)
         {
             foreach (var lector in lectores)
