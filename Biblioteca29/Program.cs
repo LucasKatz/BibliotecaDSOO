@@ -38,7 +38,7 @@ namespace Colecciones
         }
     }
 
-    // Clase Biblioteca → maneja libros
+    // Clase Biblioteca (contiene funciones que administran los libros)
     public class Biblioteca
     {
         public string Nombre { get; set; }
@@ -96,16 +96,17 @@ namespace Colecciones
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public int DNI { get; set; }
-
-        public Lector(string nombre, string apellido, int dni)
+        public int PrestamosActivos { get; set; }
+        public Lector(string nombre, string apellido, int dni, int prestamosActivos)
         {
             Nombre = nombre;
             Apellido = apellido;
             DNI = dni;
+            PrestamosActivos = prestamosActivos;
         }
     }
 
-    // Clase que maneja los lectores registrados
+    // Clase que administra los lectores registrados
     public class LectoresRegistrados
     {
         private List<Lector> lectores;
@@ -115,7 +116,7 @@ namespace Colecciones
             lectores = new List<Lector>();
         }
 
-        public string RegistrarLector(string nombre, string apellido, int dni)
+        public string RegistrarLector(string nombre, string apellido, int dni, int prestamosActivos)
         {
             foreach (var lector in lectores)
             {
@@ -123,11 +124,11 @@ namespace Colecciones
                     return "El lector ya está registrado.";
             }
 
-            lectores.Add(new Lector(nombre, apellido, dni));
+            lectores.Add(new Lector(nombre, apellido, dni, prestamosActivos));
             return "Lector registrado correctamente.";
         }
 
-        //Metodo para buscar si el lector existe
+        //Función para buscar si el lector existe
         public Lector BuscarLector(int dni)
         {
             foreach (var lector in lectores)
@@ -138,7 +139,15 @@ namespace Colecciones
             return null;
         }
 
-        // Método para prestar libro
+
+        /*public bool CantidadPrestamos(int prestamosActivos)
+        {
+            return prestamosActivos < 3;
+        }*/
+
+
+
+        // Función para prestar libro
         public string PrestarLibro(Biblioteca biblioteca, string titulo, int dni)
         {
             Lector lector = BuscarLector(dni);
@@ -152,12 +161,16 @@ namespace Colecciones
             if (libro.Prestado)
                 return "El libro ya está prestado";
 
+            if (lector.PrestamosActivos >= 3)
+                return "Alcanzó el máximo de préstamos activos";
+
             libro.Prestado = true;
+            lector.PrestamosActivos ++;
             return "Préstamo exitoso";
         }
     }
 
-    // Clase de prueba
+    // Pruebas a ver si el codigo funciona
     class Test
     {
         static void Main(string[] args)
@@ -178,18 +191,23 @@ namespace Colecciones
             LectoresRegistrados registro = new LectoresRegistrados();
 
             // Registrar lectores
-            Console.WriteLine(registro.RegistrarLector("Juan", "Perez", 12345678));
-            Console.WriteLine(registro.RegistrarLector("Ana", "Gomez", 87654321));
+            Console.WriteLine(registro.RegistrarLector("Juan", "Perez", 12345678, 0));
+            Console.WriteLine(registro.RegistrarLector("Ana", "Gomez", 87654321, 3));
 
             // Probar préstamos
-            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro1", 12345678)); // Préstamo exitoso
-            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro1", 12345678)); // Ya está prestado
-            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro3", 12345678)); // Libro inexistente
-            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro2", 99999999)); // Lector inexistente
+            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro1", 12345678));
+            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro1", 12345678));
+            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro3", 12345678));
+            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro2", 99999999));
+            Console.WriteLine(registro.PrestarLibro(biblioteca, "Libro2", 87654321));
+
 
             // Listar libros para ver el estado de préstamo
             Console.WriteLine("\nEstado de los libros después de los préstamos:");
             biblioteca.ListarLibros();
+
+            Console.ReadLine(); // para que la consola no se cierre de inmediato
         }
     }
+
 }
