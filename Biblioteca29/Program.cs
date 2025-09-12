@@ -23,7 +23,7 @@ namespace Colecciones
         public string Titulo { get; set; }
         public string Autor { get; set; }
         public string Editorial { get; set; }
-        public bool Prestado { get; set; } = false;
+        public bool Prestado { get; set; } = false;  // Al estar en la biblioteca, todo libro agregado empieza en FALSE
 
         public Libro(string titulo, string autor, string editorial)
         {
@@ -140,10 +140,7 @@ namespace Colecciones
         }
 
 
-        /*public bool CantidadPrestamos(int prestamosActivos)
-        {
-            return prestamosActivos < 3;
-        }*/
+
 
 
 
@@ -164,10 +161,11 @@ namespace Colecciones
             if (lector.PrestamosActivos >= 3)
                 return "Alcanzó el máximo de préstamos activos";
 
-            libro.Prestado = true;
-            lector.PrestamosActivos ++;
+            libro.Prestado = true;   // <-- aquí se marca como prestado
+            lector.PrestamosActivos++;
             return "Préstamo exitoso";
         }
+
     }
 
     // Pruebas a ver si el codigo funciona
