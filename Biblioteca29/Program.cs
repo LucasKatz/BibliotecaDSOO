@@ -142,40 +142,9 @@ namespace Colecciones
                 if (lector.DNI == dni)
                     return lector;
             }
+            Console.WriteLine("Lector inexistente");
             return null;
         }
-
-        public string DevolverLibro(Biblioteca biblioteca, string titulo, int dni)
-        {
-            Lector lector = BuscarLector(dni);
-            if (lector == null)
-                return "Lector inexistente";
-
-            // Buscar libro en la lista de préstamos del lector
-            Libro libro = lector.Prestamos.Find(l => l.Titulo == titulo);
-            if (libro == null)
-                return "Ese libro no está en préstamo por este lector";
-
-            // Marcar como disponible
-            libro.Prestado = false;
-
-            // Eliminar de la lista de préstamos del lector
-            lector.Prestamos.Remove(libro);
-
-            // Disminuir el contador (solo si es > 0)
-            if (lector.PrestamosActivos > 0)
-                lector.PrestamosActivos--;
-
-            // Devolver a la biblioteca (usando la firma existente)
-            biblioteca.AgregarLibro(libro.Titulo, libro.Autor, libro.Editorial);
-
-            return "Devolución exitosa";
-        }
-
-
-
-
-
 
         // Función para prestar libro
         public string PrestarLibro(Biblioteca biblioteca, string titulo, int dni)
@@ -208,6 +177,36 @@ namespace Colecciones
 
             return "Préstamo exitoso";
         }
+
+
+        // Función para devolver un libro prestado
+        public string DevolverLibro(Biblioteca biblioteca, string titulo, int dni)
+        {
+            Lector lector = BuscarLector(dni);
+            if (lector == null)
+                return "Lector inexistente";
+
+            // Buscar libro en la lista de préstamos del lector
+            Libro libro = lector.Prestamos.Find(l => l.Titulo == titulo);
+            if (libro == null)
+                return "Ese libro no está en préstamo por este lector";
+
+            // Marcar como disponible
+            libro.Prestado = false;
+
+            // Eliminar de la lista de préstamos del lector
+            lector.Prestamos.Remove(libro);
+
+            // Disminuir el contador (solo si es > 0)
+            if (lector.PrestamosActivos > 0)
+                lector.PrestamosActivos--;
+
+            // Devolver a la biblioteca (usando la firma existente)
+            biblioteca.AgregarLibro(libro.Titulo, libro.Autor, libro.Editorial);
+
+            return "Devolución exitosa";
+        }
+
 
     }
 
