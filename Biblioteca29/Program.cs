@@ -20,39 +20,39 @@ namespace Colecciones
     // Clase Libro
     public class Libro
     {
-        public string Titulo { get; set; }
-        public string Autor { get; set; }
-        public string Editorial { get; set; }
-        public bool Prestado { get; set; } = false;  // Al estar en la biblioteca, todo libro agregado empieza en FALSE
+        public string titulo { get; set; }
+        public string autor { get; set; }
+        public string editorial { get; set; }
+        public bool prestado { get; set; } = false;  // Al estar en la biblioteca, todo libro agregado empieza en FALSE
                                                      
 
         public Libro(string titulo, string autor, string editorial)
         {
-            Titulo = titulo;
-            Autor = autor;
-            Editorial = editorial;
+            this.titulo = titulo;
+            this.autor = autor;
+            this.editorial = editorial;
         }
 
 
 
         public override string ToString()
         {
-            return $"Título: {Titulo}, Autor: {Autor}, Editorial: {Editorial}, Prestado: {Prestado}";
+            return $"Título: {titulo}, Autor: {autor}, Editorial: {editorial}, Prestado: {prestado}";
         }
-    }    
-    
+    }
+
     // Clase Biblioteca (contiene funciones que administran los libros)
     public class Biblioteca
     {
-        public string Nombre { get; set; }
-        public Domicilio Domicilio { get; set; }
+        public string nombre { get; set; }
+        public Domicilio domicilio { get; set; }
         public List<Libro> libros;
 
         public Biblioteca(string nombre, Domicilio domicilio)
         {
-            Nombre = nombre;
-            Domicilio = domicilio;
-            libros = new List<Libro>();
+            this.nombre = nombre;
+            this.domicilio = domicilio;
+            this.libros = new List<Libro>();
         }
 
         public bool agregarLibro(string titulo, string autor, string editorial)
@@ -86,29 +86,64 @@ namespace Colecciones
         {
             foreach (var libro in libros)
             {
-                if (libro.Titulo.Equals(titulo))
+                if (libro.titulo.Equals(titulo))
                     return libro;
             }
             return null;
         }
-    } // OJO, A PARTIR DE ACÁ, YENDO HACIA ARRIBA, ES COPIA DE COSAS DE LA CLASE 
+
+        // 🔥 Nueva función: prestar libro desde la biblioteca
+        public string prestarLibro(LectoresRegistrados registro, string titulo, int dni)
+        {
+            // Buscar lector
+            Lector lector = registro.buscarLector(dni);
+            if (lector == null)
+                return "LECTOR INEXISTENTE";
+
+            // Buscar libro
+            Libro libro = buscarLibro(titulo);
+            if (libro == null)
+                return "LIBRO INEXISTENTE";
+
+            if (libro.prestado)
+                return "El libro ya está prestado";
+
+            if (lector.prestamosActivos >= 3)
+                return "TOPE DE PRÉSTAMO ALCANZADO";
+
+            // Marcar como prestado
+            libro.prestado = true;
+
+            // Agregar a la lista de préstamos del lector
+            lector.prestamos.Add(libro);
+
+            // Aumentar el contador
+            lector.prestamosActivos++;
+
+            // Eliminar de la biblioteca
+            eliminarLibro(titulo);
+
+            return "PRÉSTAMO EXITOSO";
+        }
+    }
+
 
     // Clase Lectores
     public class Lector
     {
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
-        public int DNI { get; set; }
-        public int PrestamosActivos { get; set; }
-        public List<Libro> Prestamos { get; set; } // Lista de libros prestados
+        public string nombre { get; set; }
+        public string apellido { get; set; }
+        public int dni { get; set; }
+        public int prestamosActivos { get; set; }
+        public List<Libro> prestamos { get; set; } // Lista de libros prestados
 
         public Lector(string nombre, string apellido, int dni, int prestamosActivos)
         {
-            Nombre = nombre;
-            Apellido = apellido;
-            DNI = dni;
-            PrestamosActivos = prestamosActivos;
-            Prestamos = new List<Libro>(); // Inicializamos lista vacía
+            this.nombre = nombre;
+            this.apellido = apellido;
+            this.dni = dni;
+            this.prestamosActivos = prestamosActivos;
+            this.prestamos = new List<Libro>(); // Inicializamos lista vacía
         }
     }
 
@@ -126,7 +161,7 @@ namespace Colecciones
         {
             foreach (var lector in lectores)
             {
-                if (lector.DNI == dni)
+                if (lector.dni == dni)
                     return "El lector ya está registrado.";
             }
 
@@ -139,45 +174,12 @@ namespace Colecciones
         {
             foreach (var lector in lectores)
             {
-                if (lector.DNI == dni)
+                if (lector.dni == dni)
                     return lector;
             }
             
             return null;
         }
-
-        // Función para prestar libro
-        public string prestarLibro(Biblioteca biblioteca, string titulo, int dni)
-        {
-            Lector lector = buscarLector(dni);
-            if (lector == null)
-                return "LECTOR INEXISTENTE";
-
-            Libro libro = biblioteca.buscarLibro(titulo);
-            if (libro == null)
-                return "LIBRO INEXISTENTE";
-
-            if (libro.Prestado)
-                return "El libro ya está prestado";
-
-            if (lector.PrestamosActivos >= 3)
-                return "TOPE DE PRESTAMO ALCANZADO";
-
-            // Marcar como prestado
-            libro.Prestado = true;
-
-            // Agregar a la lista de préstamos del lector
-            lector.Prestamos.Add(libro);
-
-            // Aumentar el contador
-            lector.PrestamosActivos++;
-
-            // Eliminar de la biblioteca
-            biblioteca.eliminarLibro(titulo);
-
-            return "PRÉSTAMO EXITOSO";
-        }
-
 
         // Función para devolver un libro prestado
         public string devolverLibro(Biblioteca biblioteca, string titulo, int dni)
@@ -187,22 +189,22 @@ namespace Colecciones
                 return "LECTOR INEXISTENTE";
 
             // Buscar libro en la lista de préstamos del lector
-            Libro libro = lector.Prestamos.Find(l => l.Titulo == titulo);
+            Libro libro = lector.prestamos.Find(l => l.titulo == titulo);
             if (libro == null)
                 return "Ese libro no está en préstamo por este lector";
 
             // Marcar como disponible
-            libro.Prestado = false;
+            libro.prestado = false;
 
             // Eliminar de la lista de préstamos del lector
-            lector.Prestamos.Remove(libro);
+            lector.prestamos.Remove(libro);
 
             // Disminuir el contador (solo si es > 0)
-            if (lector.PrestamosActivos > 0)
-                lector.PrestamosActivos--;
+            if (lector.prestamosActivos > 0)
+                lector.prestamosActivos--;
 
             // Devolver a la biblioteca (usando la firma existente)
-            biblioteca.agregarLibro(libro.Titulo, libro.Autor, libro.Editorial);
+            biblioteca.agregarLibro(libro.titulo, libro.autor, libro.editorial);
 
             return "Devolución exitosa";
         }
@@ -243,9 +245,9 @@ namespace Colecciones
 
             // Se le cargan de forma inicial 3 prestamos a Ana 
             Console.WriteLine("Se le agregan 3 prestamos a Ana");
-            Console.WriteLine(registro.prestarLibro(biblioteca, "Libro2", 87654321)); 
-            Console.WriteLine(registro.prestarLibro(biblioteca, "Libro3", 87654321)); 
-            Console.WriteLine(registro.prestarLibro(biblioteca, "Libro4", 87654321)); 
+            Console.WriteLine(biblioteca.prestarLibro(registro, "Libro2", 87654321)); 
+            Console.WriteLine(biblioteca.prestarLibro(registro, "Libro3", 87654321)); 
+            Console.WriteLine(biblioteca.prestarLibro(registro, "Libro4", 87654321)); 
 
             Console.WriteLine("Estado biblioteca después de pre-préstamos:");
             biblioteca.listarLibros();
@@ -255,27 +257,27 @@ namespace Colecciones
 
             // 1) Préstamo exitoso
             Console.WriteLine("--- Préstamo exitoso (Juan pide Libro1) ---");
-            Console.WriteLine(registro.prestarLibro(biblioteca, "Libro1", 12345678));
+            Console.WriteLine(biblioteca.prestarLibro(registro, "Libro1", 12345678));
 
             // 2) Intentar prestar libro que está marcado como Prestado (buscamos un libro y cambiamos su propiedad "Prestado" a  = true)
             Console.WriteLine("--- Intentar prestar libro ya prestado --- ");
             var libroExistente = biblioteca.buscarLibro("Libro5");
-            if (libroExistente != null) libroExistente.Prestado = true; // lo marcamos como prestado
-            Console.WriteLine(registro.prestarLibro(biblioteca, "Libro5", 12345678));
+            if (libroExistente != null) libroExistente.prestado = true; // lo marcamos como prestado
+            Console.WriteLine(biblioteca.prestarLibro(registro, "Libro5", 12345678));
            
 
 
             // 3) Libro inexistente
-            Console.WriteLine("--- Libro inexistente --- " + registro.prestarLibro(biblioteca, "LibroNoExiste", 12345678));
+            Console.WriteLine("--- Libro inexistente --- " + biblioteca.prestarLibro(registro, "LibroNoExiste", 12345678));
           
 
 
             // 4) Lector inexistente
-            Console.WriteLine("--- Lector inexistente --- " + registro.prestarLibro(biblioteca, "Libro5", 99999999));
+            Console.WriteLine("--- Lector inexistente --- " + biblioteca.prestarLibro(registro, "Libro5", 99999999));
 
             // 5) Lector alcanzó máximo de préstamos activos (Siguiendo lo cargado anteriormente, Ana ya tiene 3)
             Console.WriteLine("--- Lector alcanzó máximo de préstamos activos ---");
-            Console.WriteLine(registro.prestarLibro(biblioteca, "Libro5", 87654321));
+            Console.WriteLine(biblioteca.prestarLibro(registro, "Libro5", 87654321));
 
             // ---- Tests DevolverLibro: cubrir todos los resultados posibles ----
             Console.WriteLine("=== Tests DevolverLibro ===");
@@ -322,9 +324,9 @@ namespace Colecciones
             var ana = registro.buscarLector(87654321);
             var pepe = registro.buscarLector(22222222);
 
-            Console.WriteLine($"Juan: PrestamosActivos={juan.PrestamosActivos}, Prestamos=[{string.Join(", ", juan.Prestamos.ConvertAll(l => l.Titulo))}]");
-            Console.WriteLine($"Ana: PrestamosActivos={ana.PrestamosActivos}, Prestamos=[{string.Join(", ", ana.Prestamos.ConvertAll(l => l.Titulo))}]");
-            Console.WriteLine($"Pepe: PrestamosActivos={pepe.PrestamosActivos}, Prestamos=[{string.Join(", ", pepe.Prestamos.ConvertAll(l => l.Titulo))}]");
+            Console.WriteLine($"Juan: PrestamosActivos={juan.prestamosActivos}, Prestamos=[{string.Join(", ", juan.prestamos.ConvertAll(l => l.titulo))}]");
+            Console.WriteLine($"Ana: PrestamosActivos={ana.prestamosActivos}, Prestamos=[{string.Join(", ", ana.prestamos.ConvertAll(l => l.titulo))}]");
+            Console.WriteLine($"Pepe: PrestamosActivos={pepe.prestamosActivos}, Prestamos=[{string.Join(", ", pepe.prestamos.ConvertAll(l => l.titulo))}]");
 
             Console.ReadLine();
         }
